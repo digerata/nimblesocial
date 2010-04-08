@@ -133,13 +133,18 @@ class ProfileController {
 
         if(!user){
             log.warn("User was not located when attempting to show profile photo for $params.id")
-            response.sendError(500)
+            response.sendError(404)
             return
         }
 
-        if(user.profile.photo == null) {
-            log.warn("User [$user.id]$user.username does not have a profile photo")
-            response.sendError(404)
+		if(user.profile.gravatar) {
+			response.sendRedirect("http://www.gravatar.com/avatar/${user.profile.emailHash}.jpg?s=${params.size}")
+			return
+		}
+
+		// TODO: while, we can't do anything about the gravatar redirect, we could load the default image from disk and serve that up
+		if(user.profile.photo == null) {
+			response.sendRedirect("${g.resource(dir:'images', file:'silhouette.png')}")
             return
         }
 
